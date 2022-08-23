@@ -73,7 +73,7 @@ New::~New(){
 }
 
 void New::add(){
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, QStringLiteral("添加图片"), "./", QStringLiteral("图片文件(*png *jpg)"));
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, QStringLiteral("添加图片"), "./", QStringLiteral("图片文件(*png *jpg *jpeg)"));
 
     this->imagesList->addItems(fileNames);
 
