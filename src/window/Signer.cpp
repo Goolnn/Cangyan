@@ -21,8 +21,6 @@ Signer::Signer(CYFile* file) : QWidget(nullptr){
 }
 
 Signer::~Signer(){
-    qDebug("Signer has being deleted.");
-
     delete this->file;
 
 }
@@ -55,13 +53,23 @@ Byte Signer::getFocusIndex(){
 }
 
 void Signer::keyPressEvent(QKeyEvent* event){
-    if(event->key() == Qt::Key_Left){
+    if(event->key() == Qt::Key_A){
         this->previous();
 
     }
     
-    if(event->key() == Qt::Key_Right){
+    if(event->key() == Qt::Key_D){
         this->next();
+
+    }
+
+    if(event->key() == Qt::Key_S){
+        emit tryAdd();
+
+    }
+
+    if(event->key() == Qt::Key_W){
+        emit tryRemove();
 
     }
 
@@ -97,9 +105,7 @@ void Signer::mousePressEvent(QMouseEvent* event){
             float mouseX = (pos.x() - this->imageX) * (this->file->images.at(this->index).width() / this->imageWidth);
             float mouseY = (pos.y() - this->imageY) * (this->file->images.at(this->index).height() / this->imageHeight);
 
-            qDebug("%f", sqrt((text.getX() - mouseX) * (text.getX() - mouseX) + (text.getY() - mouseY) * (text.getY() - mouseY)));
-
-            if(sqrt((text.getX() - mouseX) * (text.getX() - mouseX) + (text.getY() - mouseY) * (text.getY() - mouseY)) <= 28){
+            if(sqrt((text.getX() - mouseX) * (text.getX() - mouseX) + (text.getY() - mouseY) * (text.getY() - mouseY)) <= this->RADIUS){
                 this->focusIndex = i + 1;
 
                 break;
@@ -157,10 +163,10 @@ void Signer::paintEvent(QPaintEvent*){
 
         p.setPen(QPen(QColor(0, 0, 0, 0)));
 
-        p.drawEllipse(imageX + text.getX() * (this->imageWidth / this->file->images.at(this->index).width()) - 14, imageY + text.getY() * (this->imageHeight / this->file->images.at(this->index).height()) - 14, 28, 28);
+        p.drawEllipse(imageX + text.getX() * (this->imageWidth / this->file->images.at(this->index).width()) - this->RADIUS / 2, imageY + text.getY() * (this->imageHeight / this->file->images.at(this->index).height()) - this->RADIUS / 2, this->RADIUS, this->RADIUS);
 
         p.setPen(QPen(QColor(255, 255, 255)));
-        p.drawText(QRect(imageX + text.getX() * (this->imageWidth / this->file->images.at(this->index).width()) - 14, imageY + text.getY() * (this->imageHeight / this->file->images.at(this->index).height()) - 14, 28, 28), Qt::AlignCenter, QString("%1").arg(i + 1));
+        p.drawText(QRect(imageX + text.getX() * (this->imageWidth / this->file->images.at(this->index).width()) - this->RADIUS / 2, imageY + text.getY() * (this->imageHeight / this->file->images.at(this->index).height()) - this->RADIUS / 2, this->RADIUS, this->RADIUS), Qt::AlignCenter, QString("%1").arg(i + 1));
 
     }
 

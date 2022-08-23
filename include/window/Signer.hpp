@@ -15,6 +15,8 @@ class Signer : public QWidget{
     Q_OBJECT
     
     private:
+        const Byte RADIUS = 24;
+        
         CYFile* file;
 
         unsigned char index;
@@ -62,6 +64,9 @@ class Signer : public QWidget{
         void focusChanged();
 
         void addDone();
+
+        void tryRemove();
+        void tryAdd();
 
 };
 

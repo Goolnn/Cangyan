@@ -16,8 +16,9 @@ SOURCES += src/window/Window.cpp \
            src/tool/Text.cpp \
            src/Cangyan.cpp
 
-QT += widgets \
-      gui
+RESOURCES += qrc/resources.qrc
+
+QT += widgets
 
 CONFIGS += console
 

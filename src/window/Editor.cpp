@@ -62,12 +62,13 @@ Editor::Editor(CYFile* file){
     QObject::connect(this->textEdit, SIGNAL(textChanged()), this, SLOT(saveText()));
 
     QObject::connect(this->signer, SIGNAL(addDone()), this, SLOT(addDone()));
+
+    QObject::connect(this->signer, SIGNAL(tryRemove()), this, SLOT(remove()));
+    QObject::connect(this->signer, SIGNAL(tryAdd()), this, SLOT(add()));
     
 }
 
 Editor::~Editor(){
-    qDebug("Editor has being deleted.");
-
     delete textEdit;
     
     delete addButton;
@@ -141,8 +142,6 @@ void Editor::saveText(){
         Text* text = (Text*)&(this->signer->getCYFile()->texts.at(this->signer->getIndex()).at(this->signer->getFocusIndex() - 1));
         text->setText(this->textEdit->toPlainText());
 
-        qDebug("保存文本");
-
     }
 
 }
@@ -159,13 +158,14 @@ void Editor::addDone(){
 }
 
 void Editor::remove(){
-    qDebug("删除%d号文本", this->signer->getFocusIndex());
-    
-    QList<Text>* list = (QList<Text>*)&(this->signer->getCYFile()->texts.at(this->signer->getIndex()));
-    list->removeAt(this->signer->getFocusIndex() - 1);
+    if(this->signer->getFocusIndex() != 0){
+        QList<Text>* list = (QList<Text>*)&(this->signer->getCYFile()->texts.at(this->signer->getIndex()));
+        list->removeAt(this->signer->getFocusIndex() - 1);
 
-    this->signer->setFocusIndex(0);
+        this->signer->setFocusIndex(0);
 
-    this->update();
+        this->update();
+
+    }
 
 }

@@ -53,8 +53,6 @@ New::New(QWidget* parent) : QWidget(parent){
 }
 
 New::~New(){
-    qDebug("New has being deleted.");
-
     delete nameLabel;
     delete nameInput;
 
@@ -153,8 +151,14 @@ void New::accept(){
                 if(image.open(QIODevice::ReadOnly)){
                     unsigned int imageSize = image.size();
 
-                    file->images.push_back(QImage::fromData((unsigned char*)image.readAll().data(), imageSize));
+                    Byte* data = (Byte*)malloc(imageSize);
+                    QDataStream stream = QDataStream(&image);
+                    stream.readRawData((char*)data, imageSize);
+
+                    file->images.push_back(QImage::fromData(data, imageSize));
                     file->texts.push_back(QList<Text>());
+
+                    free(data);
 
                 }
 

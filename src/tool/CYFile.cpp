@@ -132,7 +132,6 @@ void CYFile::saveFile(){
                 stream << text.getY();
 
                 unsigned short size = text.getText().toStdString().size() + 1;
-                qDebug("%d", size);
                 stream.writeRawData((const char*)&size, 2);
                 stream.writeRawData(text.getText().toStdString().data(), size);
                 

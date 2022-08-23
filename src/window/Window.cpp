@@ -14,11 +14,11 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
     this->editMenu = new QMenu("编辑(&E)", this);
     this->helpMenu = new QMenu("帮助(&H)", this);
 
-    this->newAction   = new QAction("新建", this);
-    this->openAction  = new QAction("打开", this);
-    this->saveAction  = new QAction("保存", this);
-    this->closeAction = new QAction("关闭", this);
-    this->exitAction  = new QAction("退出", this);
+    this->newAction   = new QAction("新建文件", this);
+    this->openAction  = new QAction("打开文件", this);
+    this->saveAction  = new QAction("保存文件", this);
+    this->closeAction = new QAction("关闭界面", this);
+    this->exitAction  = new QAction("退出程序", this);
 
     this->undoAction  = new QAction("撤销", this);
     this->redoAction  = new QAction("重做", this);
@@ -29,9 +29,16 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
     this->aboutAction = new QAction("关于", this);
 
     // 汉化组徽标
-    this->logo = new QImage("./res/logo.png");
+    this->logo = new QImage(":/res/logo.png");
 
     this->file = nullptr;
+
+    // 设置菜单快捷键
+    this->newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+    this->openAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    this->saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+    this->closeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+    this->exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
 
     // 连接菜单栏
     this->menuBar->addMenu(this->fileMenu);
@@ -68,13 +75,11 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
     this->setWindowTitle("苍眼汉化组");
     this->setMinimumSize(640, 480);
     this->setMenuBar(this->menuBar);
-    this->resize(800, 600);
+    this->resize(1280, 720);
 
 }
 
 Window::~Window(){
-    qDebug("Window has being deleted.");
-
     delete this->menuBar;
 
     delete this->fileMenu;
@@ -100,7 +105,6 @@ Window::~Window(){
 }
 
 void Window::setCYFile(CYFile* file){
-    qDebug("设置CY文件");
     this->file = file;
 
 }
@@ -195,7 +199,6 @@ void Window::openFile(){
 
 void Window::saveFile(){
     if(this->file != nullptr){
-        qDebug("保存文件");
         this->file->saveFile();
 
     }
@@ -227,6 +230,6 @@ void Window::closeView(){
 }
 
 void Window::about(){
-    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n版本：1.0.0");
+    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n版本：1.0.7");
 
 }
