@@ -1,9 +1,7 @@
-#include <QTextDocument>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QPainter>
 #include <QWidget>
-#include <QFont>
 
 #include "window/Window.hpp"
 #include "window/Editor.hpp"
