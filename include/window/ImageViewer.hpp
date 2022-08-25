@@ -3,6 +3,7 @@
 
 #include <QPaintEvent>
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <QKeyEvent>
 #include <QWidget>
 #include <QImage>
@@ -11,7 +12,7 @@
 #include "tool/CYFile.hpp"
 #include "tool/Text.hpp"
 
-class Signer : public QWidget{
+class ImageViewer : public QWidget{
     Q_OBJECT
     
     private:
@@ -21,6 +22,13 @@ class Signer : public QWidget{
 
         unsigned char index;
         unsigned char size;
+
+        // 图片缩放
+        float scale;
+
+        // 显示坐标
+        float viewX;
+        float viewY;
 
         // 图像坐标
         float imageX;
@@ -33,10 +41,19 @@ class Signer : public QWidget{
         bool adding;
 
         Byte focusIndex;
+
+        //鼠标坐标
+        int mouseX;
+        int mouseY;
+
+        float oldViewX;
+        float oldViewY;
+
+        bool moving;
     
     public:
-        Signer(CYFile* file);
-        ~Signer();
+        ImageViewer(CYFile* file);
+        ~ImageViewer();
 
         void setFocusIndex(Byte index);
 
@@ -52,6 +69,8 @@ class Signer : public QWidget{
         void keyPressEvent(QKeyEvent*);
 
         void mousePressEvent(QMouseEvent*);
+        void mouseMoveEvent(QMouseEvent*);
+        void wheelEvent(QWheelEvent*);
     
     public slots:
         void previous();

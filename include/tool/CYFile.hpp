@@ -8,7 +8,9 @@
 #include "tool/Text.hpp"
 #include "tool/Byte.hpp"
 
-class CYFile{
+class CYFile : public QObject{
+    Q_OBJECT
+
     private:
         // 文件头部
         const Byte HEADER[15] = {0xE8, 0x8B, 0x8D, 0xE7, 0x9C, 0xBC, 0xE6, 0xB1, 0x89, 0xE5, 0x8C, 0x96, 0xE7, 0xBB, 0x84};
@@ -25,9 +27,17 @@ class CYFile{
 
         Byte loadFile();
         void saveFile();
+
+        void setText(Byte page, Byte index, QString text);
+        void addText(Byte page, Text text);
+        void removeText(Byte page, Byte index);
     
     private:
         bool dataCompare(Byte* data1, Byte* data2, unsigned int size);
+    
+    signals:
+        void fileSaved();
+        void fileChanged();
 
 };
 

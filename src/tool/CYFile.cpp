@@ -143,6 +143,36 @@ void CYFile::saveFile(){
 
     file.close();
 
+    emit fileSaved();
+
+}
+
+void CYFile::setText(Byte page, Byte index, QString text){
+    QList<Text>* list = (QList<Text>*)&(this->texts.at(page));
+    Text* t = (Text*)&list->at(index);
+
+    t->setText(text);
+
+    emit fileChanged();
+
+}
+
+void CYFile::addText(Byte page, Text text){
+    QList<Text>* list = (QList<Text>*)&(this->texts.at(page));
+
+    list->push_back(text);
+
+    emit fileChanged();
+
+}
+
+void CYFile::removeText(Byte page, Byte index){
+    QList<Text>* list = (QList<Text>*)&(this->texts.at(page));
+
+    list->removeAt(index);
+
+    emit fileChanged();
+
 }
 
 bool CYFile::dataCompare(Byte* data1, Byte* data2, unsigned int size){

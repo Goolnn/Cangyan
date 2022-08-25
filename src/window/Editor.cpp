@@ -6,7 +6,7 @@ Editor::Editor(CYFile* file){
 
     this->splitter = new QSplitter();
 
-    this->signer = new Signer(file);
+    this->signer = new ImageViewer(file);
 
     this->textWidget = new QWidget();
     this->textLayout = new QVBoxLayout();
@@ -139,8 +139,7 @@ void Editor::updateDelete(){
 
 void Editor::saveText(){
     if(this->signer->getFocusIndex() != 0){
-        Text* text = (Text*)&(this->signer->getCYFile()->texts.at(this->signer->getIndex()).at(this->signer->getFocusIndex() - 1));
-        text->setText(this->textEdit->toPlainText());
+        this->signer->getCYFile()->setText(this->signer->getIndex(), this->signer->getFocusIndex() - 1, this->textEdit->toPlainText());
 
     }
 
@@ -159,9 +158,7 @@ void Editor::addDone(){
 
 void Editor::remove(){
     if(this->signer->getFocusIndex() != 0){
-        QList<Text>* list = (QList<Text>*)&(this->signer->getCYFile()->texts.at(this->signer->getIndex()));
-        list->removeAt(this->signer->getFocusIndex() - 1);
-
+        this->signer->getCYFile()->removeText(this->signer->getIndex(), this->signer->getFocusIndex() - 1);
         this->signer->setFocusIndex(0);
 
         this->update();

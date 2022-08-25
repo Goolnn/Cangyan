@@ -9,7 +9,7 @@
 #include <QWidget>
 #include <QLabel>
 
-#include "window/Signer.hpp"
+#include "window/ImageViewer.hpp"
 
 class Editor : public QWidget{
     Q_OBJECT
@@ -19,7 +19,7 @@ class Editor : public QWidget{
 
         QSplitter* splitter;
 
-        Signer* signer;
+        ImageViewer* signer;
 
         QWidget* textWidget;
         QVBoxLayout* textLayout;

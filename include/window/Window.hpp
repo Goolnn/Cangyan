@@ -39,6 +39,8 @@ class Window : public QMainWindow{
 
         CYFile* file;
 
+        bool filesaved;
+
     public:
         Window(QWidget* parent = nullptr);
         ~Window();
@@ -57,6 +59,9 @@ class Window : public QMainWindow{
         void closeView();
 
         void about();
+
+        void fileSaved();
+        void fileChanged();
     
 };
 

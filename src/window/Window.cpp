@@ -5,6 +5,7 @@
 
 #include "window/Window.hpp"
 #include "window/Editor.hpp"
+#include "tool/BezierCurve.hpp"
 
 Window::Window(QWidget* parent) : QMainWindow(parent){
     // 菜单栏
@@ -33,12 +34,14 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
 
     this->file = nullptr;
 
+    this->filesaved = true;
+
     // 设置菜单快捷键
-    this->newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
-    this->openAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-    this->saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-    this->closeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
-    this->exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+    this->newAction->setShortcut(QKeySequence::New);
+    this->openAction->setShortcut(QKeySequence::Open);
+    this->saveAction->setShortcut(QKeySequence::Save);
+    this->closeAction->setShortcut(QKeySequence::Close);
+    this->exitAction->setShortcut(QKeySequence::Quit);
 
     // 连接菜单栏
     this->menuBar->addMenu(this->fileMenu);
@@ -75,7 +78,7 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
     this->setWindowTitle("苍眼汉化组");
     this->setMinimumSize(640, 480);
     this->setMenuBar(this->menuBar);
-    this->resize(1280, 720);
+    this->resize(960, 640);
 
 }
 
@@ -107,17 +110,47 @@ Window::~Window(){
 void Window::setCYFile(CYFile* file){
     this->file = file;
 
+    QObject::connect(this->file, SIGNAL(fileSaved()), this, SLOT(fileSaved()));
+    QObject::connect(this->file, SIGNAL(fileChanged()), this, SLOT(fileChanged()));
+
 }
 
 void Window::paintEvent(QPaintEvent*){
     QPainter p = QPainter(this);
 
+    // 组徽显示动画
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    static long startTime = 0;
+
+    p.setOpacity(0);
+
+    long deltaTime = ms.count() - startTime - 500;
+
+    if(startTime == 0){
+        startTime = ms.count();
+        this->update();
+        
+    }else{
+        float process = deltaTime / 1000.0;
+
+        if(process <= 1.0){
+            p.setOpacity(process);
+            this->update();
+
+        }else{
+            p.setOpacity(1.0);
+
+        }
+
+    }
+
+    // 绘制组徽
     p.drawImage((this->width() - this->logo->width()) / 2, (this->height() - this->logo->height()) / 2, *this->logo);
 
 }
 
 void Window::closeEvent(QCloseEvent* event){
-    if(this->file != nullptr){
+    if(this->file != nullptr && !this->filesaved){
         QMessageBox::StandardButton result = QMessageBox::question(this, "保存", "是否先进行最后一次保存后再进行新建操作？", QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::StandardButton::Yes);
 
         if(result == QMessageBox::Yes){
@@ -143,7 +176,7 @@ void Window::closeEvent(QCloseEvent* event){
 }
 
 void Window::newFile(){
-    if(this->file != nullptr){
+    if(this->file != nullptr && !this->filesaved){
         QMessageBox::StandardButton result = QMessageBox::question(this, "保存", "是否先进行最后一次保存后再进行新建操作？", QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::StandardButton::Yes);
 
         if(result == QMessageBox::StandardButton::Yes){
@@ -165,7 +198,7 @@ void Window::newFile(){
 }
 
 void Window::openFile(){
-    if(this->file != nullptr){
+    if(this->file != nullptr && !this->filesaved){
         QMessageBox::StandardButton result = QMessageBox::question(this, "保存", "是否先进行最后一次保存后再进行打开操作？", QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::StandardButton::Yes);
 
         if(result == QMessageBox::StandardButton::Yes){
@@ -198,15 +231,16 @@ void Window::openFile(){
 }
 
 void Window::saveFile(){
-    if(this->file != nullptr){
+    if(this->file != nullptr && !this->filesaved){
         this->file->saveFile();
+        this->filesaved = true;
 
     }
 
 }
 
 void Window::closeView(){
-    if(this->file != nullptr){
+    if(this->file != nullptr && !this->filesaved){
         QMessageBox::StandardButton result = QMessageBox::question(this, "保存", "是否先进行最后一次保存后再进行打开操作？", QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::StandardButton::Yes);
 
         if(result == QMessageBox::StandardButton::Yes){
@@ -230,6 +264,18 @@ void Window::closeView(){
 }
 
 void Window::about(){
-    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n版本：1.0.7");
+    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n版本：1.0.14");
+
+}
+
+void Window::fileSaved(){
+    this->setWindowTitle("苍眼汉化组");
+    this->filesaved = true;
+
+}
+
+void Window::fileChanged(){
+    this->setWindowTitle(" • 苍眼汉化组");
+    this->filesaved = false;
 
 }
