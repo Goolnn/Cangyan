@@ -151,9 +151,12 @@ void CYFile::setText(Byte page, Byte index, QString text){
     QList<Text>* list = (QList<Text>*)&(this->texts.at(page));
     Text* t = (Text*)&list->at(index);
 
-    t->setText(text);
+    if(t->getText().compare(text) != 0){
+        t->setText(text);
 
-    emit fileChanged();
+        emit fileChanged();
+
+    }
 
 }
 

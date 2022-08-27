@@ -27,11 +27,12 @@ class Window : public QMainWindow{
         QAction* closeAction;       //关闭
         QAction* exitAction;        //退出
 
-        QAction* undoAction;        //撤销
-        QAction* redoAction;        //重做
-        QAction* cutAction;         //剪切
-        QAction* copyAction;        //复制
-        QAction* pasteAction;       //粘贴
+        QAction* imagesListAction;  //图像列表
+        // QAction* undoAction;        //撤销
+        // QAction* redoAction;        //重做
+        // QAction* cutAction;         //剪切
+        // QAction* copyAction;        //复制
+        // QAction* pasteAction;       //粘贴
 
         QAction* aboutAction;       //关于
 
@@ -57,6 +58,8 @@ class Window : public QMainWindow{
         void openFile();
         void saveFile();
         void closeView();
+
+        void openImagesList();
 
         void about();
 

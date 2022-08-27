@@ -2,12 +2,15 @@
 #define GOOLNN_CANGYAN_WINDOW_NEWFILE
 
 #include <QVBoxLayout>
+#include <QScrollArea>
 #include <QListWidget>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QWidget>
 #include <QLabel>
+
+#include "window/ImagesManager.hpp"
 
 class New : public QWidget{
     Q_OBJECT
@@ -16,18 +19,16 @@ class New : public QWidget{
         QVBoxLayout* layout;
 
         QHBoxLayout* nameLayout;
-        QLabel*      nameLabel;
         QLineEdit*   nameInput;
 
-        QListWidget* imagesList;
+        QScrollArea* scrollArea;
+        ImagesManager* imagesManager;
 
         QHBoxLayout* buttonLayout;
         QPushButton* acceptButton;
         QPushButton* cancelButton;
         QPushButton* addButton;
         QPushButton* removeButton;
-        QPushButton* upButton;
-        QPushButton* downButton;
 
     public:
         New(QWidget* parent = nullptr);
@@ -35,12 +36,11 @@ class New : public QWidget{
     
     private slots:
         void add();
-        void remove();
-        void up();
-        void down();
 
         void cancel();
         void accept();
+
+        void focusChanged(Byte newIndex);
 
 };
 

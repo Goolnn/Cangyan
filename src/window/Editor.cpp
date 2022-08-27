@@ -6,10 +6,11 @@ Editor::Editor(CYFile* file){
 
     this->splitter = new QSplitter();
 
-    this->signer = new ImageViewer(file);
+    this->imageViewer = new ImageViewer(file);
 
     this->textWidget = new QWidget();
     this->textLayout = new QVBoxLayout();
+    this->indexLabel = new QLabel("");
     this->textEdit   = new QTextEdit();
 
     this->buttonLayout = new QHBoxLayout();
@@ -18,14 +19,17 @@ Editor::Editor(CYFile* file){
 
     this->buttomLayout   = new QHBoxLayout();
     this->previousButton = new QPushButton("上一页");
-    this->pageLabel      = new QLabel(QString("%1/%2").arg(this->signer->getIndex()+1).arg(this->signer->getSize()));
+    this->pageLabel      = new QLabel(QString("%1/%2").arg(this->imageViewer->getIndex()+1).arg(this->imageViewer->getSize()));
     this->nextButton     = new QPushButton("下一页");
 
     this->previousButton->setDisabled(true);
     this->textEdit->setDisabled(true);
     this->removeButton->setDisabled(true);
 
+    this->indexLabel->setAlignment(Qt::AlignCenter);
+
     this->textWidget->setLayout(this->textLayout);
+    this->textLayout->addWidget(this->indexLabel);
     this->textLayout->addWidget(this->textEdit);
     this->textLayout->addLayout(this->buttonLayout);
 
@@ -40,7 +44,7 @@ Editor::Editor(CYFile* file){
     this->buttomLayout->addStretch();
     this->buttomLayout->addWidget(this->nextButton);
 
-    this->signer->setParent(this->splitter);
+    this->imageViewer->setParent(this->splitter);
     this->textWidget->setParent(this->splitter);
 
     this->layout->addWidget(this->splitter);
@@ -50,26 +54,27 @@ Editor::Editor(CYFile* file){
 
     QObject::connect(this->addButton, SIGNAL(clicked()), this, SLOT(add()));
 
-    QObject::connect(this->previousButton, SIGNAL(clicked()), this->signer, SLOT(previous()));
-    QObject::connect(this->nextButton, SIGNAL(clicked()), this->signer, SLOT(next()));
+    QObject::connect(this->previousButton, SIGNAL(clicked()), this->imageViewer, SLOT(previous()));
+    QObject::connect(this->nextButton, SIGNAL(clicked()), this->imageViewer, SLOT(next()));
 
     QObject::connect(this->removeButton, SIGNAL(clicked()), this, SLOT(remove()));
 
-    QObject::connect(this->signer, SIGNAL(pageChanged()), this, SLOT(updatePage()));
-    QObject::connect(this->signer, SIGNAL(focusChanged()), this, SLOT(updateText()));
-    QObject::connect(this->signer, SIGNAL(focusChanged()), this, SLOT(updateDelete()));
+    QObject::connect(this->imageViewer, SIGNAL(pageChanged()), this, SLOT(updatePage()));
+    QObject::connect(this->imageViewer, SIGNAL(focusChanged()), this, SLOT(updateText()));
+    QObject::connect(this->imageViewer, SIGNAL(focusChanged()), this, SLOT(updateDelete()));
 
     QObject::connect(this->textEdit, SIGNAL(textChanged()), this, SLOT(saveText()));
 
-    QObject::connect(this->signer, SIGNAL(addDone()), this, SLOT(addDone()));
+    QObject::connect(this->imageViewer, SIGNAL(addDone()), this, SLOT(addDone()));
 
-    QObject::connect(this->signer, SIGNAL(tryRemove()), this, SLOT(remove()));
-    QObject::connect(this->signer, SIGNAL(tryAdd()), this, SLOT(add()));
+    QObject::connect(this->imageViewer, SIGNAL(tryRemove()), this, SLOT(remove()));
+    QObject::connect(this->imageViewer, SIGNAL(tryAdd()), this, SLOT(add()));
     
 }
 
 Editor::~Editor(){
     delete textEdit;
+    delete indexLabel;
     
     delete addButton;
     delete removeButton;
@@ -83,7 +88,7 @@ Editor::~Editor(){
     delete nextButton;
     delete buttomLayout;
 
-    delete signer;
+    delete imageViewer;
 
     delete splitter;
 
@@ -92,9 +97,9 @@ Editor::~Editor(){
 }
 
 void Editor::updatePage(){
-    this->pageLabel->setText(QString("%1/%2").arg(this->signer->getIndex()+1).arg(this->signer->getSize()));
+    this->pageLabel->setText(QString("%1/%2").arg(this->imageViewer->getIndex()+1).arg(this->imageViewer->getSize()));
 
-    if(this->signer->getIndex() == 0){
+    if(this->imageViewer->getIndex() == 0){
         this->previousButton->setDisabled(true);
 
     }else{
@@ -102,7 +107,7 @@ void Editor::updatePage(){
 
     }
 
-    if(this->signer->getIndex() == this->signer->getSize() - 1){
+    if(this->imageViewer->getIndex() == this->imageViewer->getSize() - 1){
         this->nextButton->setDisabled(true);
 
     }else{
@@ -113,21 +118,23 @@ void Editor::updatePage(){
 }
 
 void Editor::updateText(){
-    if(this->signer->getFocusIndex() != 0){
+    if(this->imageViewer->getFocusIndex() != 0){
         this->textEdit->setDisabled(false);
-        Text text = this->signer->getCYFile()->texts.at(this->signer->getIndex()).at(this->signer->getFocusIndex() - 1);
+        Text text = this->imageViewer->getCYFile()->texts.at(this->imageViewer->getIndex()).at(this->imageViewer->getFocusIndex() - 1);
         this->textEdit->setText(text.getText());
+        this->indexLabel->setText(QString("%1").arg(this->imageViewer->getFocusIndex()));
 
     }else{
         this->textEdit->setDisabled(true);
         this->textEdit->setText("");
+        this->indexLabel->setText("");
 
     }
 
 }
 
 void Editor::updateDelete(){
-    if(this->signer->getFocusIndex() != 0){
+    if(this->imageViewer->getFocusIndex() != 0){
         this->removeButton->setDisabled(false);
 
     }else{
@@ -138,8 +145,8 @@ void Editor::updateDelete(){
 }
 
 void Editor::saveText(){
-    if(this->signer->getFocusIndex() != 0){
-        this->signer->getCYFile()->setText(this->signer->getIndex(), this->signer->getFocusIndex() - 1, this->textEdit->toPlainText());
+    if(this->imageViewer->getFocusIndex() != 0){
+        this->imageViewer->getCYFile()->setText(this->imageViewer->getIndex(), this->imageViewer->getFocusIndex() - 1, this->textEdit->toPlainText());
 
     }
 
@@ -147,7 +154,7 @@ void Editor::saveText(){
 
 void Editor::add(){
     this->addButton->setDisabled(true);
-    this->signer->add();
+    this->imageViewer->add();
 
 }
 
@@ -157,9 +164,9 @@ void Editor::addDone(){
 }
 
 void Editor::remove(){
-    if(this->signer->getFocusIndex() != 0){
-        this->signer->getCYFile()->removeText(this->signer->getIndex(), this->signer->getFocusIndex() - 1);
-        this->signer->setFocusIndex(0);
+    if(this->imageViewer->getFocusIndex() != 0){
+        this->imageViewer->getCYFile()->removeText(this->imageViewer->getIndex(), this->imageViewer->getFocusIndex() - 1);
+        this->imageViewer->setFocusIndex(0);
 
         this->update();
 

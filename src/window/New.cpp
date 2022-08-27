@@ -11,10 +11,10 @@ New::New(QWidget* parent) : QWidget(parent){
     this->layout = new QVBoxLayout();
 
     this->nameLayout = new QHBoxLayout();
-    this->nameLabel  = new QLabel("名称");
     this->nameInput  = new QLineEdit();
 
-    this->imagesList = new QListWidget();
+    this->scrollArea = new QScrollArea();
+    this->imagesManager = new ImagesManager();
 
     this->buttonLayout = new QHBoxLayout();
     this->acceptButton = new QPushButton("确认");
@@ -22,103 +22,64 @@ New::New(QWidget* parent) : QWidget(parent){
 
     this->addButton    = new QPushButton("添加");
     this->removeButton = new QPushButton("删除");
-    this->upButton     = new QPushButton("上移");
-    this->downButton   = new QPushButton("下移");
 
-    this->nameLayout->addWidget(this->nameLabel);
+    this->removeButton->setDisabled(true);
+
+    this->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    this->scrollArea->setWidget(this->imagesManager);
+
+    this->nameInput->setPlaceholderText("文件名称");
+    this->nameInput->setAlignment(Qt::AlignHCenter);
+
+    this->nameLayout->addStretch();
     this->nameLayout->addWidget(this->nameInput);
+    this->nameLayout->addStretch();
 
     this->buttonLayout->addWidget(this->addButton);
     this->buttonLayout->addWidget(this->removeButton);
-    this->buttonLayout->addWidget(this->upButton);
-    this->buttonLayout->addWidget(this->downButton);
     this->buttonLayout->addStretch();
     this->buttonLayout->addWidget(this->cancelButton);
     this->buttonLayout->addWidget(this->acceptButton);
 
     this->layout->addLayout(this->nameLayout);
-    this->layout->addWidget(this->imagesList);
+    this->layout->addWidget(this->scrollArea);
     this->layout->addLayout(this->buttonLayout);
 
     this->setLayout(layout);
     
     QObject::connect(this->addButton, SIGNAL(clicked()), this, SLOT(add()));
-    QObject::connect(this->removeButton, SIGNAL(clicked()), this, SLOT(remove()));
-    QObject::connect(this->upButton, SIGNAL(clicked()), this, SLOT(up()));
-    QObject::connect(this->downButton, SIGNAL(clicked()), this, SLOT(down()));
+    QObject::connect(this->removeButton, SIGNAL(clicked()), this->imagesManager, SLOT(removeImage()));
 
     QObject::connect(this->cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
     QObject::connect(this->acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
+
+    QObject::connect(this->imagesManager, SIGNAL(focusChanged(Byte)), this, SLOT(focusChanged(Byte)));
     
 }
 
 New::~New(){
-    delete nameLabel;
-    delete nameInput;
+    delete this->nameInput;
 
-    delete imagesList;
+    delete this->imagesManager;
+    delete this->scrollArea;
 
-    delete acceptButton;
-    delete cancelButton;
-    delete addButton;
-    delete removeButton;
+    delete this->acceptButton;
+    delete this->cancelButton;
+    delete this->addButton;
+    delete this->removeButton;
 
-    delete nameLayout;
-    delete buttonLayout;
+    delete this->nameLayout;
+    delete this->buttonLayout;
     
-    delete layout;
+    delete this->layout;
 
 }
 
 void New::add(){
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, QStringLiteral("添加图片"), "./", QStringLiteral("图片文件(*png *jpg *jpeg)"));
+    QStringList files = QFileDialog::getOpenFileNames(this, QStringLiteral("添加图片"), "./", QStringLiteral("图片文件(*png *jpg *jpeg)"));
 
-    this->imagesList->addItems(fileNames);
-
-}
-
-void New::remove(){
-    delete this->imagesList->currentItem();
-
-}
-
-void New::up(){
-    QListWidgetItem* currentItem = this->imagesList->currentItem();
-
-    if(currentItem != nullptr){
-        int currentRow = this->imagesList->currentRow();
-        QString currentString = currentItem->text();
-
-        if(currentRow > 0){
-            delete currentItem;
-
-            this->imagesList->insertItem(currentRow - 1, currentString);
-
-        }
-
-        this->imagesList->setCurrentRow(currentRow - 1);
-
-    }
-
-}
-
-void New::down(){
-    QListWidgetItem* currentItem = this->imagesList->currentItem();
-
-    if(currentItem != nullptr){
-        int currentRow = this->imagesList->currentRow();
-        QString currentString = currentItem->text();
-
-        if(this->imagesList->count() - currentRow > 0){
-            delete currentItem;
-
-            this->imagesList->insertItem(currentRow + 1, currentString);
-
-        }
-
-        this->imagesList->setCurrentRow(currentRow + 1);
-
-    }
+    this->imagesManager->addFiles(files);
 
 }
 
@@ -132,10 +93,10 @@ void New::cancel(){
 
 void New::accept(){
     QString filename = this->nameInput->text();
-    int count  = this->imagesList->count();
+    int count  = this->imagesManager->files.size();
 
     if(filename.compare("") == 0 || count == 0){
-        QMessageBox::warning(this, "苍眼汉化组 - 警告", "不输入名称或不导入图片的情况下无法保存！");
+        QMessageBox::warning(this, "警告", "不输入名称或不导入图片的情况下无法保存！");
 
     }else{
         //选择文件保存位置
@@ -144,25 +105,10 @@ void New::accept(){
         if(savefile.compare("") != 0){
             CYFile* file = new CYFile(savefile.append(QString("/%1.cy").arg(filename)));
 
+            file->images = this->imagesManager->images;
+
             for(int i = 0; i < count; i++){
-                QListWidgetItem* item = this->imagesList->item(i);
-                QFile image = QFile(item->text());
-
-                if(image.open(QIODevice::ReadOnly)){
-                    unsigned int imageSize = image.size();
-
-                    Byte* data = (Byte*)malloc(imageSize);
-                    QDataStream stream = QDataStream(&image);
-                    stream.readRawData((char*)data, imageSize);
-
-                    file->images.push_back(QImage::fromData(data, imageSize));
-                    file->texts.push_back(QList<Text>());
-
-                    free(data);
-
-                }
-
-                image.close();
+                file->texts.push_back(QList<Text>());
 
             }
 
@@ -183,6 +129,17 @@ void New::accept(){
             editor->show();
 
         }
+
+    }
+
+}
+
+void New::focusChanged(Byte newIndex){
+    if(newIndex != 0){
+        this->removeButton->setDisabled(false);
+
+    }else{
+        this->removeButton->setDisabled(true);
 
     }
 

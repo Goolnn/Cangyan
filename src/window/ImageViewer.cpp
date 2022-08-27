@@ -235,18 +235,30 @@ void ImageViewer::mouseMoveEvent(QMouseEvent* event){
 
 void ImageViewer::wheelEvent(QWheelEvent* event){
     if(event->angleDelta().y() > 0){
-        this->scale *= event->angleDelta().y() / 100.0;
+        if(this->scale < 1 && this->scale * 1.125 > 1){
+            this->scale = 1;
 
-        if(this->scale > 10){
-            this->scale = 10;
+        }else{
+            this->scale *= 1.125;
+
+            if(this->scale > 10){
+                this->scale = 10;
+
+            }
 
         }
 
     }else{
-        this->scale /= - event->angleDelta().y() / 100.0;
+        if(this->scale > 1 && this->scale / 1.125 < 1){
+            this->scale = 1;
 
-        if(this->scale < 0.25){
-            this->scale = 0.25;
+        }else{
+            this->scale /= 1.125;
+
+            if(this->scale < 0.25){
+                this->scale = 0.25;
+
+            }
 
         }
 
@@ -304,12 +316,29 @@ void ImageViewer::paintEvent(QPaintEvent*){
 
     }
 
+    // 绘制缩放倍数
+    if(this->scale != 1){
+        p.setBrush(QBrush(QColor(0, 0, 0, 0.25 * 255)));
+        p.setPen(QPen(QColor(0, 0, 0, 0)));
+
+        p.drawRoundedRect(10 ,10, 65, 25, 16, 16);
+
+        p.setPen(QPen(QColor(255, 255, 255)));
+        p.drawText(10, 10, 65, 25, Qt::AlignCenter, QString("x%1").arg(this->scale, 0, 'f', 2));
+
+    }
+
 }
 
 void ImageViewer::previous(){
     if(this->index > 0){
         this->focusIndex = 0;
         this->index--;
+
+        this->scale = 1.0;
+
+        this->viewX = this->file->images.at(index).width() / 2;
+        this->viewY = this->file->images.at(index).height() / 2;
 
         this->update();
 
@@ -324,6 +353,11 @@ void ImageViewer::next(){
     if(this->index < this->size - 1){
         this->focusIndex = 0;
         this->index++;
+
+        this->scale = 1.0;
+
+        this->viewX = this->file->images.at(index).width() / 2;
+        this->viewY = this->file->images.at(index).height() / 2;
 
         this->update();
 

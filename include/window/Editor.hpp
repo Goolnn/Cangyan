@@ -19,10 +19,11 @@ class Editor : public QWidget{
 
         QSplitter* splitter;
 
-        ImageViewer* signer;
+        ImageViewer* imageViewer;
 
         QWidget* textWidget;
         QVBoxLayout* textLayout;
+        QLabel* indexLabel;
         QTextEdit* textEdit;
 
         QHBoxLayout* buttonLayout;
