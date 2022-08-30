@@ -5,7 +5,7 @@
 
 #include "window/Window.hpp"
 #include "window/Editor.hpp"
-#include "window/New.hpp"
+#include "window/NewFile.hpp"
 
 New::New(QWidget* parent) : QWidget(parent){
     this->layout = new QVBoxLayout();

@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QLabel>
 
+#include "window/NotesViewer.hpp"
 #include "window/ImageViewer.hpp"
 
 class Editor : public QWidget{
@@ -24,6 +25,8 @@ class Editor : public QWidget{
         QWidget* textWidget;
         QVBoxLayout* textLayout;
         QLabel* indexLabel;
+        // NotesViewer* notesViewer;
+
         QTextEdit* textEdit;
 
         QHBoxLayout* buttonLayout;

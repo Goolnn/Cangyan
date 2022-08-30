@@ -14,6 +14,8 @@ ImageViewer::ImageViewer(CYFile* file) : QWidget(nullptr){
     this->index = 0;
     this->size = this->file->images.size();
 
+    this->focusIndex = 0;
+
     this->adding = false;
 
     this->setFocusPolicy(Qt::StrongFocus);
@@ -80,35 +82,56 @@ void ImageViewer::keyPressEvent(QKeyEvent* event){
 
     }
 
-    if(event->key() == Qt::Key_Up){
-        this->viewY += 10;
+    if(event->key() == Qt::Key_Q){
+        if(this->focusIndex == 0){
+            this->focusIndex = this->getCYFile()->texts.at(this->index).size();
+
+        }else{
+            this->focusIndex -= 1;
+
+        }
+
+        if(event->modifiers() == Qt::AltModifier && this->focusIndex != 0){
+            Text* text = (Text*)&this->getCYFile()->texts.at(this->index).at(this->focusIndex - 1);
+
+            this->viewX = text->getX();
+            this->viewY = text->getY();
+
+        }
+
+        emit focusChanged();
         this->update();
 
     }
 
-    if(event->key() == Qt::Key_Down){
-        this->viewY -= 10;
+    if(event->key() == Qt::Key_E){
+        if(this->focusIndex == this->getCYFile()->texts.at(this->index).size()){
+            this->focusIndex = 0;
+
+        }else{
+            this->focusIndex += 1;
+
+        }
+
+        if(event->modifiers() == Qt::AltModifier && this->focusIndex != 0){
+            Text* text = (Text*)&this->getCYFile()->texts.at(this->index).at(this->focusIndex - 1);
+
+            this->viewX = text->getX();
+            this->viewY = text->getY();
+            
+        }
+
+        emit focusChanged();
         this->update();
 
     }
 
-    if(event->key() == Qt::Key_Left){
-        this->viewX += 10;
-        this->update();
+    if(event->key() == Qt::Key_Space){
+        if(this->focusIndex != 0){
+            Text* text = (Text*)&this->getCYFile()->texts.at(this->index).at(this->focusIndex - 1);
 
-    }
-
-    if(event->key() == Qt::Key_Right){
-        this->viewX -= 10;
-        this->update();
-
-    }
-
-    if(event->key() == Qt::Key_K){
-        this->scale *= 1.5;
-
-        if(this->scale > 10){
-            this->scale = 10;
+            this->viewX = text->getX();
+            this->viewY = text->getY();
             
         }
 
@@ -116,13 +139,11 @@ void ImageViewer::keyPressEvent(QKeyEvent* event){
 
     }
 
-    if(event->key() == Qt::Key_L){
-        this->scale /= 1.5;
+    if(event->key() == Qt::Key_R){
+        this->viewX = this->getCYFile()->images.at(this->index).width() / 2;
+        this->viewY = this->getCYFile()->images.at(this->index).height() / 2;
 
-        if(this->scale < 0.25){
-            this->scale = 0.25;
-            
-        }
+        this->scale = 1;
 
         this->update();
 

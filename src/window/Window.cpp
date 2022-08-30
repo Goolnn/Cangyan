@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QMimeData>
 #include <QPainter>
 #include <QWidget>
 
@@ -8,7 +9,7 @@
 #include "window/Editor.hpp"
 #include "tool/BezierCurve.hpp"
 
-Window::Window(QWidget* parent) : QMainWindow(parent){
+Window::Window(QString filepath) : QMainWindow(nullptr){
     // 菜单栏
     this->menuBar = new QMenuBar(this);
 
@@ -38,14 +39,16 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
 
     this->filesaved = true;
 
-    // 设置菜单快捷键
-    this->newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
-    this->openAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-    this->saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-    this->closeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
-    this->exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+    this->fileDraging = false;
 
-    this->imagesListAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_L));
+    // 设置菜单快捷键
+    this->newAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_N));
+    this->openAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_O));
+    this->saveAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
+    this->closeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_W));
+    this->exitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q));
+
+    this->imagesListAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_L));
 
     // 连接菜单栏
     this->menuBar->addMenu(this->fileMenu);
@@ -86,7 +89,21 @@ Window::Window(QWidget* parent) : QMainWindow(parent){
     this->setMinimumSize(640, 480);
     this->setMenuBar(this->menuBar);
     this->setWindowIcon(QIcon(":/res/icon.png"));
+    this->setAcceptDrops(true);
     this->resize(960, 640);
+
+    // 判断是否打开文件
+    if(filepath.compare("") != 0){
+        CYFile* file = new CYFile(filepath);
+        file->loadFile();
+        this->setCYFile(file);
+
+        Editor* editor = new Editor(file);
+
+        this->setCentralWidget(editor);
+        editor->show();
+
+    }
 
 }
 
@@ -142,12 +159,12 @@ void Window::paintEvent(QPaintEvent*){
     }else{
         float process = deltaTime / 1000.0;
 
-        if(process <= 1.0){
+        if(process <= 1){
             p.setOpacity(process);
             this->update();
 
         }else{
-            p.setOpacity(1.0);
+            p.setOpacity(1);
 
         }
 
@@ -155,6 +172,79 @@ void Window::paintEvent(QPaintEvent*){
 
     // 绘制组徽
     p.drawImage((this->width() - this->logo->width()) / 2, (this->height() - this->logo->height()) / 2, *this->logo);
+
+    // 绘制文件拖动遮罩
+    if(this->fileDraging){
+        p.setBrush(QBrush(QColor(0, 0, 0, 255 * 0.25)));
+        p.setPen(QPen(QColor(0, 0, 0, 0)));
+
+        p.drawRect(0, 0, this->width(), this->height());
+
+    }
+
+}
+
+void Window::dragEnterEvent(QDragEnterEvent* event){
+    if(event->mimeData()->urls()[0].fileName().right(3).compare(".cy") == 0){
+        if(this->centralWidget() != nullptr){
+            this->centralWidget()->hide();
+
+        }
+
+        this->fileDraging = true;
+        this->update();
+
+        event->acceptProposedAction();
+
+    }else{
+        event->ignore();
+
+    }
+
+}
+
+void Window::dragLeaveEvent(QDragLeaveEvent*){
+    if(this->centralWidget() != nullptr){
+        this->centralWidget()->show();
+
+    }
+
+    this->fileDraging = false;
+    this->update();
+
+}
+
+void Window::dropEvent(QDropEvent* event){
+    if(this->file != nullptr && !this->filesaved){
+        QMessageBox::StandardButton result = QMessageBox::question(this, "保存", "是否先进行最后一次保存后再进行打开操作？", QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::StandardButton::Yes);
+
+        if(result == QMessageBox::StandardButton::Yes){
+            this->file->saveFile();
+            this->file = nullptr;
+
+        }else if(result == QMessageBox::StandardButton::Cancel){
+            this->fileDraging = false;
+            this->centralWidget()->show();
+
+            return;
+
+        }
+
+    }
+
+    this->setWindowTitle("苍眼汉化组");
+
+    this->fileDraging = false;
+    this->update();
+
+    CYFile* file = new CYFile(event->mimeData()->urls()[0].toLocalFile());
+    file->loadFile();
+    this->setCYFile(file);
+
+    Editor* editor = new Editor(file);
+
+    this->setCentralWidget(editor);
+    editor->show();
 
 }
 
@@ -299,7 +389,7 @@ void Window::openImagesList(){
 }
 
 void Window::about(){
-    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n\n程序代码由 谷林 编写，程序背景图标、应用图标由 柴白 绘制。\n\n版本：1.0.14");
+    QMessageBox::about(this, "关于", "由谷林为苍眼汉化组便于开展工作而设计的小程序~\n如果有任何更新建议都可以向谷林提出哦！\n\n特别鸣谢：\n柴白 绘制汉化组图标和程序图标！\n\n版本：1.0.33");
 
 }
 

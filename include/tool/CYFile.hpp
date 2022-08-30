@@ -2,6 +2,7 @@
 #define GOOLNN_CANGYAN_TOOL_CYFILE
 
 #include <QString>
+#include <QObject>
 #include <QImage>
 #include <QList>
 

@@ -8,7 +8,7 @@
 #include <QImage>
 #include <QMenu>
 
-#include "window/New.hpp"
+#include "window/NewFile.hpp"
 #include "tool/CYFile.hpp"
 
 class Window : public QMainWindow{
@@ -42,14 +42,20 @@ class Window : public QMainWindow{
 
         bool filesaved;
 
+        bool fileDraging;
+
     public:
-        Window(QWidget* parent = nullptr);
+        Window(QString filepath);
         ~Window();
 
         void setCYFile(CYFile* file);
 
     protected:
         void paintEvent(QPaintEvent*);
+
+        void dragEnterEvent(QDragEnterEvent* event);
+        void dragLeaveEvent(QDragLeaveEvent* event);
+        void dropEvent(QDropEvent* event);
 
         void closeEvent(QCloseEvent* event);
     

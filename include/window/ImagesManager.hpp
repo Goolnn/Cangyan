@@ -12,9 +12,10 @@ class ImagesManager : public QWidget{
     Q_OBJECT
 
     private:
-        const Byte ROW_SIZE = 9;
+        const Byte ROW_SIZE = 6;
         const Byte INDEX_SIZE = 50;
 
+        Byte hoverIndex;
         Byte focusIndex;
 
     public:
@@ -31,6 +32,7 @@ class ImagesManager : public QWidget{
         void paintEvent(QPaintEvent*);
 
         void mousePressEvent(QMouseEvent* event);
+        void mouseMoveEvent(QMouseEvent* event);
     
     public slots:
         void removeImage();

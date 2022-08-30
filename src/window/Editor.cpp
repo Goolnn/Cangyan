@@ -10,7 +10,9 @@ Editor::Editor(CYFile* file){
 
     this->textWidget = new QWidget();
     this->textLayout = new QVBoxLayout();
-    this->indexLabel = new QLabel("");
+    this->indexLabel = new QLabel(QString("%1").arg(this->imageViewer->getCYFile()->texts.at(this->imageViewer->getIndex()).size()));
+    // this->notesViewer = new NotesViewer();
+
     this->textEdit   = new QTextEdit();
 
     this->buttonLayout = new QHBoxLayout();
@@ -122,12 +124,12 @@ void Editor::updateText(){
         this->textEdit->setDisabled(false);
         Text text = this->imageViewer->getCYFile()->texts.at(this->imageViewer->getIndex()).at(this->imageViewer->getFocusIndex() - 1);
         this->textEdit->setText(text.getText());
-        this->indexLabel->setText(QString("%1").arg(this->imageViewer->getFocusIndex()));
+        this->indexLabel->setText(QString("%1/%2").arg(this->imageViewer->getFocusIndex()).arg(this->imageViewer->getCYFile()->texts.at(this->imageViewer->getIndex()).size()));
 
     }else{
         this->textEdit->setDisabled(true);
         this->textEdit->setText("");
-        this->indexLabel->setText("");
+        this->indexLabel->setText(QString("%1").arg(this->imageViewer->getCYFile()->texts.at(this->imageViewer->getIndex()).size()));
 
     }
 

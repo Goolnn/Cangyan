@@ -9,8 +9,10 @@
 #include "window/ImagesManager.hpp"
 
 ImagesManager::ImagesManager(QWidget* parent) : QWidget(parent){
+    this->setMouseTracking(true);
     this->setFixedSize(1, 1);
 
+    this->hoverIndex = 0;
     this->focusIndex = 0;
 
 }
@@ -60,6 +62,14 @@ void ImagesManager::paintEvent(QPaintEvent*){
     float imageSize  = (float)this->parentWidget()->width() / this->ROW_SIZE;
 
     if(this->files.size() != 0){
+        if(this->hoverIndex != 0 && this->hoverIndex != this->focusIndex){
+            p.setBrush(QBrush(QColor(0, 0, 0, 255 * 0.0625)));
+            p.setPen(QPen(QColor(0, 0, 0, 0)));
+
+            p.drawRect(imageSize * ((this->hoverIndex - 1) % this->ROW_SIZE), (imageSize + this->INDEX_SIZE) * ((this->hoverIndex - 1) / this->ROW_SIZE), imageSize, imageSize + this->INDEX_SIZE);
+
+        }
+
         if(this->focusIndex != 0){
             p.setBrush(QBrush(QColor(0, 0, 0, 255 * 0.125)));
             p.setPen(QPen(QColor(0, 0, 0, 0)));
@@ -123,7 +133,29 @@ void ImagesManager::mousePressEvent(QMouseEvent* event){
         this->focusIndex = 0;
         emit focusChanged(this->focusIndex);
 
+        this->update();
+
     }
+
+}
+
+void ImagesManager::mouseMoveEvent(QMouseEvent* event){
+    float imageSize  = (float)this->parentWidget()->width() / this->ROW_SIZE;
+
+    int width = imageSize;
+    int height = imageSize + this->INDEX_SIZE;
+    
+    Byte index = event->pos().y() / height * this->ROW_SIZE + event->pos().x() / width + 1;
+
+    if(index <= this->images.size()){
+        this->hoverIndex = index;
+
+    }else{
+        this->hoverIndex = 0;
+
+    }
+
+    this->update();
 
 }
 
